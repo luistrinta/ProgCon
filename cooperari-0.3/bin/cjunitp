@@ -1,0 +1,45 @@
+#! /bin/bash
+
+
+### Validate arguments ###
+if [[ $# -eq 0  || $# -gt 2 ]] 
+then
+  cat << EOT
+Cooperari preemptive JUnit test executor (http://cooperari.org) 
+      
+Usage: 
+   cjunitp [root_dir] test_class
+EOT
+  exit 1
+fi
+
+if [ $# -eq 1 ]
+then
+  root_dir="."
+  test_class=$1
+else
+  root_dir=$1
+  test_class=$2
+fi
+
+if [ ! -d $root_dir ]
+then
+   echo cjunitp: $root_dir is not a directory!
+   exit 1
+fi
+
+### Setup global configuration ###
+source $(dirname $0)/cclasspath
+cdata_dir=$root_dir/cdata
+
+### Finally proceed with actual execution ### 
+CLASSPATH="$COOPERARI_CLASSPATH:$root_dir/classes:$CLASSPATH"
+#echo $CLASSPATH
+#echo $ASPECTJ_AGENT_JAR
+
+java -classpath "$CLASSPATH" \
+   org.cooperari.tools.cjunit.Main \
+   $cdata_dir \
+   $test_class
+
+exit $?

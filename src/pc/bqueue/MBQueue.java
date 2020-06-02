@@ -1,0 +1,94 @@
+package pc.bqueue;
+
+import pc.util.UnexpectedException;
+
+/**
+ * Monitor-based implementation of queue. 
+ * 
+ *
+ * @param <E> Type of elements.
+ */
+public class MBQueue<E> implements BQueue<E> {
+
+  protected E[] array;
+  protected int head, size;
+
+  /**
+   * Constructor.
+   * @param initialCapacity Initial queue capacity.
+   * @throws IllegalArgumentException if {@code capacity <= 0}
+   */
+  @SuppressWarnings("unchecked")
+  public MBQueue(int initialCapacity) {
+    head = 0;
+    size = 0;
+    array = (E[]) new Object[initialCapacity];
+  }
+
+  @Override
+  public synchronized int capacity() {
+    return array.length;
+  }
+
+  @Override
+  public synchronized int size() {
+    return size;
+  }
+
+
+  @Override
+  public  void add(E elem) {   
+    synchronized(this) {
+      while (size == array.length) {
+        // queue is full
+        try {
+          wait();
+        } 
+        catch (InterruptedException e) {
+          throw new UnexpectedException(e);
+        } 
+      }
+      array[(head + size) % array.length] = elem;
+      notify(); // BUG: it should be notifyAll()
+    }
+    synchronized(this) { // BUG: only one synchronized block should be used
+      size++; 
+    }
+  }
+
+  @Override
+  public  E remove() { 
+    E elem = null;
+    synchronized(this) {
+      while (size == 0) {
+        // queue is empty
+        try {
+          wait();
+        } 
+        catch (InterruptedException e) {
+          throw new UnexpectedException(e);
+        } 
+      }
+
+      elem = array[head];
+      array[head] = null;
+      head = (head + 1) % array.length;
+      
+    }
+    synchronized(this) {  // BUG: only one synchronized block should be used
+      notify(); // BUG: it should be notifyAll
+      size--; 
+    }
+    return elem;
+  }
+
+  /**
+   * Test instantiation.
+   */
+  public static final class Test extends BQueueTest {
+    @Override
+    <T> BQueue<T> createBQueue(int capacity) {
+      return new MBQueue<>(capacity);
+    }
+  }
+}
