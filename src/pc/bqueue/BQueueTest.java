@@ -277,7 +277,7 @@ public abstract class BQueueTest {
     assertEquals(1111, a.get() + b.get() + c.get() + d.get()); 
   }
 
-  @Test @Ignore
+  @Test 
   public void test9() {   
     BQueue<Integer> q = createBQueue(4);
     AtomicInteger a = new AtomicInteger();
@@ -291,21 +291,25 @@ public abstract class BQueueTest {
         );
     assertEquals(1, q.size());
 
-    // TODO uncomment and complete
-//    int [][] abPossibilities = {
-//        { 3, 0 } 
-//        // ...
-//    };
-//    boolean found = false;
-//    for (int[] p: abPossibilities) {
-//      if (a.get() == p[0] && b.get() == p[1]) {
-//        found = true;
-//        break; 
-//      }
-//    }
-//    if (!found) { 
-//      fail("Did you consider a = " + a.get() + " and  b=" + b.get() + " ?");
-//    }
+    int [][] abPossibilities = {
+       { 3 , 0 },
+       {3,-1},
+       { 0 , 3 },
+       { 1 , 0 },
+       { 0 , 1 },
+       { 3 , 1 },
+       {-1,0}
+       };
+    boolean found = false;
+    for (int[] p: abPossibilities) {
+      if (a.get() == p[0] && b.get() == p[1]) {
+        found = true;
+        break; 
+      }
+    }
+    if (!found) { 
+     fail("Did you consider a = " + a.get() + " and  b=" + b.get() + " ?");
+    }
 
     CSystem.forkAndJoin(
         () -> { c.set(q.remove());  },
@@ -316,6 +320,30 @@ public abstract class BQueueTest {
     assertEquals(1, q.size());
     
     // TODO similar for c and d 
-
+    int [][] cdPossibilities = {
+    		{ 1 , 3 },
+    		{ 3 , 1 },
+    		{ 1 , 0 },
+    		{ 0 , 1 },
+    		{ 1 , 1 },
+    		{ 0 , 3 },
+    		{ 3 , 0 },
+    		{ 2 , 3 },
+    		{3 , 2 },
+    		{2,0},
+    		{3,-1},
+    		
+            };
+         found = false;
+         for (int[] p: cdPossibilities) {
+           if (c.get() == p[0] && d.get() == p[1]) {
+             found = true;
+             System.out.println("Combination c = " + c.get() + " and  d=" + d.get() + " found!");
+             break; 
+           }
+         }
+         if (!found) { 
+          fail("Did you consider c = " + c.get() + " and  d=" + d.get() + " ?");
+         }
   }
 }

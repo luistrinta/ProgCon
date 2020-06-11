@@ -41,7 +41,7 @@ public class STMBQueueU<E> implements BQueue<E>{
 
   @Override
   public void add(E elem) {
-    // TODO
+   
   }
 
   @Override

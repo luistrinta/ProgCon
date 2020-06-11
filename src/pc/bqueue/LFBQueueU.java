@@ -43,18 +43,58 @@ public class LFBQueueU<E>  implements BQueue<E> {
   
   @Override
   public int size() {
-    return tail.get() - head.get();
+	  rooms.enter(2);
+		rooms.leave(2);
+	    return tail.get() - head.get();
   }
 
   @Override
-  public void add(E elem) {   
-    // TODO
+  public void add(E elem) {
+	
+	  if(tail.get() == array.length) {
+		 E[] array2 = (E[]) new Object[(array.length)*2];
+		 for(int i =0 ; i < array.length;i++) {
+			 array2[i] = array[i];
+		 }
+		 array = array2;
+	  }
+	  while(true) {
+		  rooms.enter(0);
+		  int p = tail.getAndIncrement();
+      if (p - head.get() < array.length) {
+        array[p % array.length] = elem;
+        rooms.leave(0);
+        break;
+      } else {
+        // "undo"
+        tail.getAndDecrement();
+        rooms.leave(0);
+      }
+    }
   }
   
   @Override
   public E remove() {   
-    // TODO: should be the same as LFQueue
-    return null;
+	  E elem = null;
+	     while(true) {
+	    	 rooms.enter(1);
+	    	 int p = head.getAndIncrement();
+	 
+	       if (p < tail.get()) {
+
+	    	   int pos = p % array.length;
+	        elem = array[pos];
+	        array[pos] = null;
+	        rooms.leave(1);
+	        
+	        break;
+	      } else {
+	        // "undo" 
+	    	  head.getAndDecrement();
+	    	  rooms.leave(1);
+	      }
+	    }
+	    return elem;
   }
 
   /**
@@ -63,7 +103,7 @@ public class LFBQueueU<E>  implements BQueue<E> {
   public static final class Test extends BQueueTest {
     @Override
     <T> BQueue<T> createBQueue(int capacity) {
-      return new LFBQueueU<>(capacity, false);
+      return new LFBQueueU<>(capacity, true);
     }
   }
 }
