@@ -35,7 +35,7 @@ public class WebServer  {
         int port = args.length >= 2 ? 
             Integer.parseInt(args[1]) : 8123;
             int threads = args.length >= 3 ?
-                Integer.parseInt(args[2]) : 4;
+                Integer.parseInt(args[2]) : 8;
 
                 WebServer ws = new WebServer(home, port, threads);
                 ws.start();

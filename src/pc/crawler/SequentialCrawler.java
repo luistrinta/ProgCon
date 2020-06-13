@@ -96,7 +96,7 @@ public class SequentialCrawler {
   private static final Pattern HTML_LINK_REGEX = Pattern.compile("\\<a\\s+href\\=\"(.*?)\"");
 
   protected List<String> performTransfer(int rid, URL url) {
-    try {
+	  try {
       HttpURLConnection conn =
           (HttpURLConnection) url.openConnection();
       conn.setRequestMethod("GET");
@@ -150,6 +150,7 @@ public class SequentialCrawler {
           sin.nextLine();
         }
       }
+     // System.out.println(rid+" "+url.toString()+" ---------------------------------------");
       return links;
     } 
     catch(Exception e) {
