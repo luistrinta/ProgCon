@@ -52,6 +52,8 @@ public class LFBQueueU<E>  implements BQueue<E> {
   public void add(E elem) {
 	
 	  if(tail.get() == array.length) {
+		 
+		 @SuppressWarnings("unchecked")
 		 E[] array2 = (E[]) new Object[(array.length)*2];
 		 for(int i =0 ; i < array.length;i++) {
 			 array2[i] = array[i];
