@@ -41,13 +41,33 @@ public class STMBQueueU<E> implements BQueue<E>{
 
   @Override
   public void add(E elem) {
-   
+
+    STM.atomic(() -> {
+
+      if (size.get() == arrayRef.get().length()) {
+        TArray.View<E> temp = arrayRef.get();
+        TArray.View<E> temp2 = STM.newTArray(arrayRef.get().length() *2);
+        for (int i = 0; i < temp.length(); i++) {
+          temp2.update(i, temp.apply(i));
+        }
+        arrayRef.set(temp2);
+      }
+      arrayRef.get().update((head.get() + size.get()) % arrayRef.get().length(), elem);
+      STM.increment(size, 1);
+    });
   }
 
   @Override
   public E remove() {
-    // TODO
-    return null;
+    return STM.atomic(() -> {
+      if (size.get() == 0)
+        STM.retry();
+
+      E elem = arrayRef.get().apply(head.get());
+      head.set((head.get() + 1) % arrayRef.get().length());
+      STM.increment(size, -1);
+      return elem;
+    });
   }
   
   /**

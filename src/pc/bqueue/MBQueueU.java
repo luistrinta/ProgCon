@@ -1,5 +1,8 @@
 package pc.bqueue;
 
+
+import pc.util.UnexpectedException;
+
 /**
  * Monitor-based implementation of queue. 
  * 
@@ -23,8 +26,17 @@ public class MBQueueU<E> extends MBQueue<E> {
   }
   
   @Override
-  public synchronized void add(E elem) {   
-    // TODO
+  public synchronized void add(E elem) {
+      if (size == array.length) {
+        E[] temp = array;
+        array = (E[]) new Object[array.length +2];
+        for (int i = 0; i <temp.length; i++) {
+          array[i] = temp[i];
+        }
+      }
+      array[(head + size) % array.length] = elem;
+      notifyAll();
+      size++;
   }
   
   /**

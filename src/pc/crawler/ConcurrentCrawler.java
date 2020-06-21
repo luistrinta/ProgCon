@@ -23,7 +23,7 @@ public class ConcurrentCrawler extends SequentialCrawler {
 	private AtomicInteger counter = new AtomicInteger();
 	
   public static void main(String[] args) throws IOException {
-    int threads = args.length > 0 ?  Integer.parseInt(args[0]) : 8;
+    int threads = args.length > 0 ?  Integer.parseInt(args[0]) : 16;
     String url = args.length > 1 ? args[1] : "http://localhost:8123";
     ConcurrentCrawler cc = new ConcurrentCrawler(threads);
     cc.setVerboseOutput(false);

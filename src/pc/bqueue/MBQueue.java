@@ -49,11 +49,10 @@ public class MBQueue<E> implements BQueue<E> {
         } 
       }
       array[(head + size) % array.length] = elem;
-      notify(); // BUG: it should be notifyAll()
+      notifyAll(); //DONE BUG: it should be notifyAll()
+        size++;
     }
-    synchronized(this) { // BUG: only one synchronized block should be used
-      size++; 
-    }
+
   }
 
   @Override
@@ -73,11 +72,9 @@ public class MBQueue<E> implements BQueue<E> {
       elem = array[head];
       array[head] = null;
       head = (head + 1) % array.length;
-      
-    }
-    synchronized(this) {  // BUG: only one synchronized block should be used
-      notify(); // BUG: it should be notifyAll
-      size--; 
+
+      notifyAll(); // BUG: it should be notifyAll
+      size--;
     }
     return elem;
   }

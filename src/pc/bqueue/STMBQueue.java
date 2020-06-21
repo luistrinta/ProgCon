@@ -45,18 +45,17 @@ public class STMBQueue<E> implements BQueue<E>{
         STM.retry();
       }
       array.update((head.get() + size.get()) % array.length(), elem);
+      STM.increment(size, 1);
     });
-    STM.increment(size, 1);
   }
 
   @Override
   public E remove() {
-    STM.atomic(() -> {
+    return STM.atomic(() -> {
       if (size.get() == 0) 
         STM.retry();
-    });
-    return STM.atomic(() -> { 
-      E elem = array.apply(head.get());      
+
+      E elem = array.apply(head.get());
       head.set((head.get() + 1) % array.length());
       STM.increment(size, -1);
       return elem;
