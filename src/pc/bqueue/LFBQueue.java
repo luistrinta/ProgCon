@@ -41,8 +41,9 @@ public class LFBQueue<E> implements BQueue<E> {
   @Override
   public int size() {
 	rooms.enter(2);
+	int val = tail.get() - head.get();
 	rooms.leave(2);
-    return tail.get() - head.get();
+    return val;
     
   }
 
@@ -57,12 +58,16 @@ public class LFBQueue<E> implements BQueue<E> {
         rooms.leave(0);
         break;
       } else {
-        // "undo"
+        if(useBackoff) {
+        	Backoff.delay();
+        }
         tail.getAndDecrement();
         rooms.leave(0);
       }
     }
-	 
+	 if(useBackoff) {
+		 Backoff.reset();
+	 }
 	  
   }
 
@@ -83,11 +88,16 @@ public class LFBQueue<E> implements BQueue<E> {
         
         break;
       } else {
-        // "undo" 
+    	  if(useBackoff) {
+    			 Backoff.delay();
+    		 }
     	  head.getAndDecrement();
     	  rooms.leave(1);
       }
     }
+     if(useBackoff) {
+		 Backoff.reset();
+	 }
     return elem;
   }
 

@@ -6,6 +6,8 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveTask;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -30,8 +32,10 @@ public class ConcurrentCrawler extends SequentialCrawler {
     cc.crawl(url);
     cc.stop();
   }
-  
-  private static HashSet<String> map = new HashSet<String>();
+  // usamos este tipo de HashMap por ser "thread safe"
+  static ConcurrentHashMap<String, Integer> concurrentMap = new ConcurrentHashMap<String , Integer>();
+  @SuppressWarnings("static-access")
+static Set<String> map = concurrentMap.newKeySet();
   /**
    * The fork-join pool.
    */
@@ -52,7 +56,7 @@ public class ConcurrentCrawler extends SequentialCrawler {
     log("Starting at %s", root);
     pool.invoke(new TransferTask(0, root));
     t = System.currentTimeMillis() - t;
-    log("Done "+counter+" transfers in %d ms" ,t);
+    log("Done "+counter.get()+" transfers in %d ms" ,t);
   }
 
   /**
@@ -79,14 +83,17 @@ public class ConcurrentCrawler extends SequentialCrawler {
     	  URL url = new URL(path);
     		  List<String>  links = performTransfer(rid,url);
     		 List<RecursiveTask<Void>> tasks = new LinkedList<>();
+    		 
         for(String link : links) {
         	String newURL = new URL(url, new URL(url,link).getPath()).toString();
+        	
         	if(!map.contains(newURL)){
-        		counter.getAndAdd(1);
-        		map.add(newURL);
-        		TransferTask  t = new TransferTask(rid+1,newURL); 
+        		if(map.add(newURL)) {
+        			counter.getAndAdd(1);
+        		TransferTask  t = new TransferTask(counter.get(),newURL); 
         		tasks.add(t);
         		t.fork();
+        		}
         	}
         }
         

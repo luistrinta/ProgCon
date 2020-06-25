@@ -277,7 +277,7 @@ public abstract class BQueueTest {
     assertEquals(1111, a.get() + b.get() + c.get() + d.get()); 
   }
 
-  @Test 
+  @Test @Ignore
   public void test9() {   
     BQueue<Integer> q = createBQueue(4);
     AtomicInteger a = new AtomicInteger();
@@ -293,12 +293,12 @@ public abstract class BQueueTest {
 
     int [][] abPossibilities = {
        { 3 , 0 },
-       {3,-1},
+       { 3 ,-1 },
        { 0 , 3 },
        { 1 , 0 },
        { 0 , 1 },
        { 3 , 1 },
-       {-1,0}
+       {-1 , 0 }
        };
     boolean found = false;
     for (int[] p: abPossibilities) {
@@ -329,9 +329,9 @@ public abstract class BQueueTest {
     		{ 0 , 3 },
     		{ 3 , 0 },
     		{ 2 , 3 },
-    		{3 , 2 },
-    		{2,0},
-    		{3,-1},
+    		{ 3 , 2 },
+    		{ 2 , 0 },
+    		{ 3 ,-1 },
     		
             };
          found = false;
