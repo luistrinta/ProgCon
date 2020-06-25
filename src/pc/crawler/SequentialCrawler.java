@@ -120,7 +120,7 @@ public class SequentialCrawler {
       byte[] buf = new byte[16384];
       int total = 0;
       try (FileOutputStream out = new FileOutputStream(tmp)) {
-        while (in.available() > 0) {
+        while (total < conn.getContentLength()) {
           int n = in.read(buf);
           total += n;
           out.write(buf, 0, n);

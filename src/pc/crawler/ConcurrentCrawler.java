@@ -3,6 +3,7 @@ package pc.crawler;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -23,6 +24,8 @@ import pc.util.UnexpectedException;
 public class ConcurrentCrawler extends SequentialCrawler {
 	
 	private AtomicInteger counter = new AtomicInteger();
+//  // usamos este tipo de Set por ser "thread safe" visto que utiliza um HashMap Concorrewnte de forma a nao perder/alterar indevidamente informações ao ser realizado o fork
+	private  Set<String> map = ConcurrentHashMap.newKeySet();
 	
   public static void main(String[] args) throws IOException {
     int threads = args.length > 0 ?  Integer.parseInt(args[0]) : 16;
@@ -32,10 +35,10 @@ public class ConcurrentCrawler extends SequentialCrawler {
     cc.crawl(url);
     cc.stop();
   }
-  // usamos este tipo de HashMap por ser "thread safe"
-  static ConcurrentHashMap<String, Integer> concurrentMap = new ConcurrentHashMap<String , Integer>();
-  @SuppressWarnings("static-access")
-static Set<String> map = concurrentMap.newKeySet();
+
+ 
+ 
+  
   /**
    * The fork-join pool.
    */
@@ -79,18 +82,16 @@ static Set<String> map = concurrentMap.newKeySet();
     @Override
     protected Void compute() {
       try {	
-        	 // System.out.println(rid+" "+path);
+        	
     	  URL url = new URL(path);
     		  List<String>  links = performTransfer(rid,url);
-    		 List<RecursiveTask<Void>> tasks = new LinkedList<>();
-    		 
+    		 List<RecursiveTask<Void>> tasks = new LinkedList<>();	 
         for(String link : links) {
         	String newURL = new URL(url, new URL(url,link).getPath()).toString();
         	
         	if(!map.contains(newURL)){
         		if(map.add(newURL)) {
-        			counter.getAndAdd(1);
-        		TransferTask  t = new TransferTask(counter.get(),newURL); 
+        		TransferTask  t = new TransferTask(counter.getAndIncrement(),newURL); 
         		tasks.add(t);
         		t.fork();
         		}
