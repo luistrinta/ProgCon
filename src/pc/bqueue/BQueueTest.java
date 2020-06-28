@@ -277,7 +277,7 @@ public abstract class BQueueTest {
     assertEquals(1111, a.get() + b.get() + c.get() + d.get()); 
   }
 
-  @Test @Ignore
+  @Test
   public void test9() {   
     BQueue<Integer> q = createBQueue(4);
     AtomicInteger a = new AtomicInteger();
@@ -319,7 +319,7 @@ public abstract class BQueueTest {
    
     assertEquals(1, q.size());
     
-    // TODO similar for c and d 
+
     int [][] cdPossibilities = {
     		{ 1 , 3 },
     		{ 3 , 1 },
@@ -335,11 +335,11 @@ public abstract class BQueueTest {
     		
             };
          found = false;
+       
          for (int[] p: cdPossibilities) {
-           if (c.get() == p[0] && d.get() == p[1]) {
+        	 if (c.get() == p[0] && d.get() == p[1]) {
              found = true;
-             System.out.println("Combination c = " + c.get() + " and  d=" + d.get() + " found!");
-             break; 
+            break;
            }
          }
          if (!found) { 
