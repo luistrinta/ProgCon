@@ -34,6 +34,7 @@ public class LFBQueueU<E>  implements BQueue<E> {
     array = (E[]) new Object[initialCapacity];
     useBackoff = backoff;
     rooms = new Rooms(3, backoff);
+    addElementFlag.set(false);
   }
 
   @Override
@@ -51,34 +52,40 @@ public class LFBQueueU<E>  implements BQueue<E> {
 
   @Override
   public void add(E elem) {
-	
-	  if(tail.get() == array.length) {
-		 
-		 @SuppressWarnings("unchecked")
-		 E[] array2 = (E[]) new Object[(array.length)*2];
-		 for(int i =0 ; i < array.length;i++) {
-			 array2[i] = array[i];
-		 }
-		 array = array2;
-	  }
 	  while(true) {
 		  rooms.enter(0);
+		  if(addElementFlag.get()) {
+			  rooms.leave(0);
+			  if(useBackoff) {
+		        	Backoff.delay();
+		        }
+			  continue;
+		  }
+		  addElementFlag.set(true);
 		  int p = tail.getAndIncrement();
       if (p - head.get() < array.length) {
         array[p % array.length] = elem;
+        addElementFlag.set(false);
         rooms.leave(0);
         break;
       } else {
-    	  if(useBackoff) {
-          	Backoff.delay();
-          }
-        tail.getAndDecrement();
+    	  
+ 		 @SuppressWarnings("unchecked")
+ 		 E[] array2 = (E[]) new Object[(array.length)*2];
+ 		 for(int i =head.get() ; i < tail.get();i++) {
+ 			 array2[i%(array2.length)] = array[i%(array.length)];
+ 		 }
+ 		 array = array2;
+ 		 array[p % array.length] = elem;
+        addElementFlag.set(false);
         rooms.leave(0);
+        break;
       }
     }
 	  if(useBackoff) {
 			 Backoff.reset();
 		 }
+	 
   }
   
   @Override
@@ -94,19 +101,19 @@ public class LFBQueueU<E>  implements BQueue<E> {
 	        elem = array[pos];
 	        array[pos] = null;
 	        rooms.leave(1);
-	        
 	        break;
 	      } else {
-	    	  if(useBackoff) {
-	            	Backoff.delay();
-	            }
+	    	 
 	    	  head.getAndDecrement();
+	    	  if(useBackoff) {
+		          	Backoff.delay();
+		          }
 	    	  rooms.leave(1);
-	      }
+	      } 
 	    }
 	     if(useBackoff) {
-			 Backoff.reset();
-		 }
+	        	Backoff.reset();
+	        }
 	    return elem;
   }
 
@@ -116,7 +123,7 @@ public class LFBQueueU<E>  implements BQueue<E> {
   public static final class Test extends BQueueTest {
     @Override
     <T> BQueue<T> createBQueue(int capacity) {
-      return new LFBQueueU<>(capacity, true);
+      return new LFBQueueU<>(capacity, false);
     }
   }
 }
